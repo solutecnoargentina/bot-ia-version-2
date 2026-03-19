@@ -42,12 +42,19 @@ const fs = require("fs")
 const path = require("path")
 
 const AGENTS_FILE = path.join(__dirname, "agents.json")
+const SETTINGS_FILE = path.join(__dirname, "settings.json")
 
 // crear archivo si no existe
 if(!fs.existsSync(AGENTS_FILE)){
   fs.writeFileSync(AGENTS_FILE,"[]")
 }
-
+if(!fs.existsSync(SETTINGS_FILE)){
+  fs.writeFileSync(SETTINGS_FILE, JSON.stringify({
+    allowGroups: false,
+    allowStatuses: false,
+    allowChannels: false
+  }, null, 2))
+}
 // obtener agentes
 app.get("/agents",(req,res)=>{
   const agents = JSON.parse(fs.readFileSync(AGENTS_FILE))
@@ -147,7 +154,17 @@ app.post("/connect",(req,res)=>{
   })
 
   client.initialize()
+client.on("message", async msg => {
 
+  if(msg.from.includes("@g.us")) return
+
+  console.log("Mensaje recibido:", msg.body)
+
+  const respuesta = await preguntarIA(msg.body)
+
+  msg.reply(respuesta)
+
+})
   res.json({success:true})
 })
 // ======================
