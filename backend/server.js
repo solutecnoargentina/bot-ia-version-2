@@ -34,14 +34,7 @@ app.get("/", (req, res) => {
   })
 })
 
-// ======================
-// PUERTO
-// ======================
-const PORT = 3000
 
-app.listen(PORT, () => {
-  console.log("Servidor corriendo en puerto " + PORT)
-})
 // ======================
 // AGENTES (BASE)
 // ======================
@@ -104,4 +97,64 @@ app.put("/agents/:id",(req,res)=>{
   fs.writeFileSync(AGENTS_FILE, JSON.stringify(agents,null,2))
 
   res.json({success:true})
+})
+// ======================
+// WHATSAPP
+// ======================
+const { Client } = require("whatsapp-web.js")
+const qrcode = require("qrcode-terminal")
+
+let client = null
+let qrCodeData = null
+let isReady = false
+
+app.get("/qr",(req,res)=>{
+  res.json({qr:qrCodeData})
+})
+
+app.get("/status",(req,res)=>{
+  res.json({connected:isReady})
+})
+
+app.post("/connect",(req,res)=>{
+
+  if(client){
+    return res.json({success:true})
+  }
+
+  client = new Client({
+  puppeteer: {
+    args: ["--no-sandbox", "--disable-setuid-sandbox"]
+  }
+})
+
+  client.on("qr",(qr)=>{
+    qrCodeData = qr
+    console.log("QR generado")
+    qrcode.generate(qr,{small:true})
+  })
+
+  client.on("ready",()=>{
+    isReady = true
+    qrCodeData = null
+    console.log("WhatsApp conectado")
+  })
+
+  client.on("disconnected",()=>{
+    isReady = false
+    client = null
+    console.log("WhatsApp desconectado")
+  })
+
+  client.initialize()
+
+  res.json({success:true})
+})
+// ======================
+// PUERTO
+// ======================
+const PORT = 3000
+
+app.listen(PORT, () => {
+  console.log("Servidor corriendo en puerto " + PORT)
 })
