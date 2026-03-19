@@ -1,28 +1,45 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Solutecno SaaS</title>
 
 <style>
+*{
+box-sizing:border-box;
+}
+
 body{
-font-family:Arial;
+font-family:Arial,Helvetica,sans-serif;
+margin:0;
 background:#0f172a;
 color:white;
+}
+
+.hidden{
+display:none !important;
+}
+
+.login-screen{
+min-height:100vh;
 display:flex;
 justify-content:center;
 align-items:center;
-height:100vh;
-margin:0;
 }
 
 .login-box{
 background:#1e293b;
 padding:30px;
 border-radius:10px;
-width:300px;
+width:320px;
 text-align:center;
+box-shadow:0 0 20px rgba(0,0,0,0.35);
+}
+
+.login-box h2{
+margin-top:0;
+margin-bottom:20px;
 }
 
 input{
@@ -44,46 +61,114 @@ cursor:pointer;
 }
 
 #error{
-color:red;
+color:#f87171;
 margin-top:10px;
+min-height:20px;
+}
+
+header{
+background:#111827;
+padding:16px 20px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+border-bottom:1px solid #334155;
+}
+
+header h1{
+margin:0;
+font-size:22px;
+}
+
+header button{
+width:auto;
+padding:10px 14px;
+}
+
+.main{
+padding:20px;
+}
+
+.card{
+background:#1e293b;
+border-radius:10px;
+padding:20px;
+margin-bottom:20px;
+box-shadow:0 0 20px rgba(0,0,0,0.20);
+}
+
+.card h2{
+margin-top:0;
 }
 </style>
-
 </head>
-
 <body>
 
-<div class="login-box">
-<h2>Solutecno Admin</h2>
+<div id="loginScreen" class="login-screen">
+  <div class="login-box">
+    <h2>Solutecno Admin</h2>
 
-<input id="user" placeholder="Usuario">
-<input id="pass" type="password" placeholder="Contraseña">
+    <input id="user" placeholder="Usuario">
+    <input id="pass" type="password" placeholder="Contraseña">
 
-<button onclick="login()">Ingresar</button>
+    <button onclick="login()">Ingresar</button>
 
-<div id="error"></div>
+    <div id="error"></div>
+  </div>
+</div>
+
+<div id="panelScreen" class="hidden">
+  <header>
+    <h1>Panel Administrador Solutecno</h1>
+    <button onclick="logout()">Cerrar sesión</button>
+  </header>
+
+  <div class="main">
+    <div class="card">
+      <h2>Estado del sistema</h2>
+      <p>Login administrador funcionando correctamente.</p>
+      <p>Backend conectado al frontend.</p>
+      <p>Base inicial del SaaS operativa.</p>
+    </div>
+
+    <div class="card">
+      <h2>Siguiente módulo</h2>
+      <p>En el próximo paso vamos a crear la sección de agentes.</p>
+    </div>
+  </div>
 </div>
 
 <script>
 async function login(){
+  const user = document.getElementById("user").value
+  const pass = document.getElementById("pass").value
+  const error = document.getElementById("error")
 
-const user = document.getElementById("user").value
-const pass = document.getElementById("pass").value
+  error.innerText = ""
 
-const res = await fetch("/login",{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({user,pass})
-})
+  const res = await fetch("/login",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({user,pass})
+  })
 
-if(res.status === 200){
-alert("Login correcto")
-}else{
-document.getElementById("error").innerText = "Credenciales incorrectas"
+  if(res.status === 200){
+    document.getElementById("loginScreen").classList.add("hidden")
+    document.getElementById("panelScreen").classList.remove("hidden")
+    return
+  }
+
+  error.innerText = "Credenciales incorrectas"
 }
 
+function logout(){
+  document.getElementById("panelScreen").classList.add("hidden")
+  document.getElementById("loginScreen").classList.remove("hidden")
+  document.getElementById("user").value = ""
+  document.getElementById("pass").value = ""
+  document.getElementById("error").innerText = ""
 }
 </script>
 
