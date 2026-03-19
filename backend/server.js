@@ -88,3 +88,20 @@ app.delete("/agents/:id",(req,res)=>{
 
   res.json({success:true})
 })
+// editar agente
+app.put("/agents/:id",(req,res)=>{
+  let agents = JSON.parse(fs.readFileSync(AGENTS_FILE))
+
+  const index = agents.findIndex(a => a.id == req.params.id)
+
+  if(index === -1){
+    return res.status(404).json({success:false})
+  }
+
+  agents[index].name = req.body.name
+  agents[index].prompt = req.body.prompt
+
+  fs.writeFileSync(AGENTS_FILE, JSON.stringify(agents,null,2))
+
+  res.json({success:true})
+})

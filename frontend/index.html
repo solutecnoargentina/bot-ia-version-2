@@ -194,7 +194,8 @@ async function loadAgents(){
     div.innerHTML = `
       <b>${a.name}</b><br>
       <small>${a.prompt}</small><br>
-      <button onclick="deleteAgent(${a.id})">Eliminar</button>
+      <button onclick="editAgent(${a.id},'${a.name}','${a.prompt}')">Editar</button>
+<button onclick="deleteAgent(${a.id})">Eliminar</button>
     `
 
     container.appendChild(div)
@@ -228,6 +229,30 @@ async function deleteAgent(id){
 }
 
 setTimeout(loadAgents,500)
+async function editAgent(id,name,prompt){
+  const newName = promptUser("Nuevo nombre", name)
+  const newPrompt = promptUser("Nuevo prompt", prompt)
+
+  if(!newName || !newPrompt) return
+
+  await fetch("/agents/"+id,{
+    method:"PUT",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({
+      name:newName,
+      prompt:newPrompt
+    })
+  })
+
+  loadAgents()
+}
+
+function promptUser(text, value){
+  const result = prompt(text, value)
+  return result
+}
 </script>
 
 </body>
